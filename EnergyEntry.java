@@ -8,7 +8,7 @@ public class EnergyEntry {
     private int productivity; // 1-5
     private int caffeine; // cups
     private String workType; // Study/Creative/Physical/Mixed
-    private String peakTime; // M / A / N / blank (optional)
+    private String peakTime; // M / A / N / blank
     private double energyScore;
 
     private static DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE;
@@ -20,8 +20,8 @@ public class EnergyEntry {
         this.mood = mood;
         this.productivity = productivity;
         this.caffeine = caffeine;
-        this.workType = workType;
-        this.peakTime = peakTime == null ? "" : peakTime.toUpperCase();
+        this.workType = sanitize(workType);
+        this.peakTime = (peakTime == null) ? "" : peakTime.toUpperCase();
         calculateScore();
     }
 
@@ -37,10 +37,9 @@ public class EnergyEntry {
         String wt = parts[5];
         String pt = parts[6];
         EnergyEntry e = new EnergyEntry(d, s, m, p, c, wt, pt);
-        // If file had score, override to keep same rounding
         try {
             e.energyScore = Double.parseDouble(parts[7]);
-        } catch (Exception ex) { /* ignore */ }
+        } catch (Exception ex) { /* ignore and keep computed */ }
         return e;
     }
 
@@ -59,14 +58,21 @@ public class EnergyEntry {
     }
 
     private void calculateScore() {
-        // Simple human-made formula (believable)
+        // Intentionally simple and explainable:
         // Energy Score = (Sleep × 2) + (Mood × 3) + (Productivity × 3) − (Caffeine × 1)
         this.energyScore = (sleepHours * 2.0) + (mood * 3.0) + (productivity * 3.0) - (caffeine * 1.0);
-        // Keep score positive
         if (this.energyScore < 0) this.energyScore = 0;
     }
 
-    public LocalDate getDate() { return date; }
+    private String sanitize(String s) {
+        if (s == null) return "Mixed";
+        s = s.trim();
+        if (s.isEmpty()) return "Mixed";
+        return s;
+    }
+
+    // getters
+    public java.time.LocalDate getDate() { return date; }
     public double getEnergyScore() { return energyScore; }
     public String getPeakTime() { return peakTime; }
     public int getSleepHours() { return sleepHours; }
@@ -78,6 +84,7 @@ public class EnergyEntry {
     @Override
     public String toString() {
         return String.format("%s | Sleep:%d Mood:%d Prod:%d Caf:%d Type:%s Peak:%s Score:%.2f",
-                date.format(fmt), sleepHours, mood, productivity, caffeine, workType, (peakTime.isEmpty()?"-":peakTime), energyScore);
+                date.format(fmt), sleepHours, mood, productivity, caffeine, workType,
+                (peakTime == null || peakTime.isEmpty() ? "-" : peakTime), energyScore);
     }
 }
