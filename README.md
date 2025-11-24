@@ -23,17 +23,12 @@ It stores data in CSV, predicts tomorrow’s energy, detects crashes, and visual
 
 ---
 
-## 📂 Project Structure
-
-Main.java EnergyEntry.java EnergyTracker.java energy_data.csv
-
----
 
 ## ▶️ Run the Project
 
 *Compile*
 
-javac Main.java EnergyEntry.java EnergyTracker.java
+javac*.java
 
 *Run*
 
@@ -101,6 +96,7 @@ java Main
 ✨ A compact, practical Java project demonstrating file handling, analytics, and clean program design.
 
 ---
+
 
 
 
