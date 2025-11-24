@@ -2,12 +2,6 @@
 This project is a simple Java-based system that helps users track their daily lifestyle inputs (sleep, mood, productivity, caffeine, etc.) and understand their energy patterns. The program stores entries in a CSV file, analyses weekly trends, shows ASCII graphs, predicts next-day energy and mood, and gives useful insights like crash warnings and recommended deep-work time.
 
 
----
-
-📌 Features
-
-1. Daily Entry System
-
 # 🌟 Human Energy Pattern Predictor (Java)
 
 A Java console app that tracks daily lifestyle inputs and generates meaningful insights about your energy levels.  
@@ -100,4 +94,5 @@ java Main
 
 
 ---
+
 
