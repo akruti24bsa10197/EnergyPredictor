@@ -8,39 +8,53 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         EnergyTracker tracker = new EnergyTracker(DATA_FILE);
 
-        System.out.println("=== Human Energy Pattern Predictor ===");
+        System.out.println("=== Human Energy Pattern Predictor (Upgraded) ===");
         while (true) {
             System.out.println();
-            System.out.println("1. Add today's entry");
-            System.out.println("2. View summary");
+            System.out.println("1. Add / Update today's entry");
+            System.out.println("2. View dashboard summary (detailed)");
             System.out.println("3. Predict tomorrow energy");
-            System.out.println("4. Show all entries");
-            System.out.println("5. Exit");
+            System.out.println("4. Show ASCII energy graph (last 7 days)");
+            System.out.println("5. Show all entries");
+            System.out.println("6. Export CSV copy");
+            System.out.println("7. Exit");
             System.out.print("Choose: ");
             String ch = sc.nextLine().trim();
-            if (ch.equals("1")) {
-                addEntryFlow(sc, tracker);
-            } else if (ch.equals("2")) {
-                System.out.println(tracker.summary());
-            } else if (ch.equals("3")) {
-                double p = tracker.predictTomorrow();
-                System.out.printf("Predicted energy for tomorrow: %.2f%n", p);
-            } else if (ch.equals("4")) {
-                tracker.getAll().forEach(e -> System.out.println(e.toString()));
-            } else if (ch.equals("5")) {
-                System.out.println("Bye.");
-                break;
-            } else {
-                System.out.println("Invalid choice.");
+            switch (ch) {
+                case "1":
+                    addEntryFlow(sc, tracker);
+                    break;
+                case "2":
+                    System.out.println(tracker.summaryDashboard());
+                    break;
+                case "3":
+                    double p = tracker.predictTomorrow();
+                    System.out.printf("Predicted energy for tomorrow: %.2f (%s)%n", p, tracker.classifyEnergy(p));
+                    System.out.println("Likely mood tomorrow: " + tracker.predictMood());
+                    break;
+                case "4":
+                    System.out.println(tracker.asciiGraph(7));
+                    break;
+                case "5":
+                    tracker.getAll().forEach(System.out::println);
+                    break;
+                case "6":
+                    exportCopy(tracker);
+                    break;
+                case "7":
+                    System.out.println("Bye.");
+                    sc.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
             }
         }
-        sc.close();
     }
 
     private static void addEntryFlow(Scanner sc, EnergyTracker tracker) {
         try {
             LocalDate date = LocalDate.now();
-
+            System.out.println("Adding entry for date: " + date);
             System.out.print("Sleep hours (0-24): ");
             int sleep = Integer.parseInt(sc.nextLine().trim());
 
@@ -57,7 +71,7 @@ public class Main {
             String wt = sc.nextLine().trim();
             if (wt.isEmpty()) wt = "Mixed";
 
-            System.out.print("Peak time today? (M=Morning, A=Afternoon, N=Night) (optional, press enter to skip): ");
+            System.out.print("Peak time today? (M=Morning, A=Afternoon, N=Night) (optional): ");
             String peak = sc.nextLine().trim().toUpperCase();
 
             EnergyEntry e = new EnergyEntry(date, sleep, mood, prod, caf, wt, peak);
@@ -65,6 +79,23 @@ public class Main {
             System.out.println("Saved entry: " + e.toString());
         } catch (Exception ex) {
             System.out.println("Error in input. Please try again. (" + ex.getMessage() + ")");
+        }
+    }
+
+    private static void exportCopy(EnergyTracker tracker) {
+        // export the CSV to a timestamped copy
+        try {
+            java.nio.file.Path src = java.nio.file.Paths.get("energy_data.csv");
+            if (!java.nio.file.Files.exists(src)) {
+                System.out.println("No data file to export.");
+                return;
+            }
+            String destName = "energy_data_copy_" + java.time.LocalDate.now() + ".csv";
+            java.nio.file.Path dest = java.nio.file.Paths.get(destName);
+            java.nio.file.Files.copy(src, dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Exported copy to: " + destName);
+        } catch (Exception e) {
+            System.out.println("Export failed: " + e.getMessage());
         }
     }
 }
